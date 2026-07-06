@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="计算巢是阿里云开放给企业应用服务商的服务管理平台。服务商能够在计算巢上发布私有化部署服务，为其客户提供云上软件一键部署的能力；同时也支持全托管模式的服务，赋能服务商托管其客户资源。">
+  <title>LakeInsight服务实例部署文档 - Aliyun 计算巢 x LakeInsight</title>
+
+  <link rel="shortcut icon" href="img/favicon.ico">
+
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css">
+  <link rel="stylesheet" href="css/theme.css">
+  
+
+  
+
+  
+  
+
+  
+    <script src="search/main.js"></script>
+  
+
+  
+
+  <script src="js/highlight.min.js"></script>
+  <script>hljs.highlightAll();</script>
+</head>
+
+<body>
+  <div class="container">
+    <div class="nav">
+      <div class="nav-inner">
+        <div class="logo">
+          <img src="./img/logo-2x.png">
+        </div>
+        <div class="nav-list">
+          <ul>
+          
+              <li><a href="#lakeinsight">LakeInsight服务实例部署文档</a></li>
+              
+                  <li><a href="#_1">概述</a></li>
+                  
+              
+                  <li><a href="#_2">计费说明</a></li>
+                  
+                      <li class="li-h3"><a href="#cru">CRU 定义</a></li>
+                  
+                      <li class="li-h3"><a href="#_3">资源计量</a></li>
+                  
+                      <li class="li-h3"><a href="#_4">计费公式</a></li>
+                  
+              
+                  <li><a href="#_5">部署架构</a></li>
+                  
+              
+                  <li><a href="#ram">RAM 账号所需权限</a></li>
+                  
+              
+                  <li><a href="#_6">部署流程</a></li>
+                  
+                      <li class="li-h3"><a href="#_7">部署步骤</a></li>
+                  
+                      <li class="li-h3"><a href="#_8">部署参数说明</a></li>
+                  
+                      <li class="li-h3"><a href="#_10">验证结果</a></li>
+                  
+              
+                  <li><a href="#_11">问题排查</a></li>
+                  
+              
+                  <li><a href="#_12">联系我们</a></li>
+                  
+              
+          
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="content theme-github">
+      
+      <div class="content-inner">        
+        
+        <h1 id="lakeinsight">LakeInsight服务实例部署文档</h1>
+<h2 id="_1">概述</h2>
+<p>LakeInsight 是开放式多模态湖仓数据智能平台，支持流、批、MPP、AI 等多种计算模式，覆盖从多源异构数据汇聚、流批一体处理分析到多模态 AI 应用的全链路场景。平台采用云原生容器化和存算分离架构，无缝对接 BI 报表与 AI 训练，在云上获得极致的弹性和性价比。</p>
+<ul>
+<li>
+<p><strong>AI Native</strong>：基于 VSCode 的 AI Native 一站式数据智能开发环境，提供编码、调试、部署的一体化体验。</p>
+</li>
+<li>
+<p><strong>Agentic AI</strong>：辅助生成代码、工作流编排、错误排查，内置开箱即用的 MCP 和 Skills，让数据智能开发像对话一样简单。</p>
+</li>
+<li>
+<p><strong>结构化、非结构化数据统一存储</strong>：构建多模态模型或向量检索应用，支持结构化数据、文本、图片、音视频等多种数据类型的统一接入、混合存储与分析处理。无需切换工具，即可完成数据清洗、特征提取与模型训练，让复杂数据像模块化积木一样自由组合。</p>
+</li>
+<li>
+<p><strong>数据自动化集成、流批任务开发和管理</strong>：提供从数据接入、开发治理到数据服务和 BI 的一站式湖仓数据智能平台，支持多源及湖仓数据的交互式分析，并可自动化创建数据采集与导出任务。平台提供任务运行监控与日志解析能力，结合自然语言生成 SQL，实现从分析到发布、审批与上线的全流程闭环，提升数据处理与应用效率。</p>
+</li>
+</ul>
+<blockquote>
+<p>更多产品功能介绍与使用指南，请参见 <a href="https://www.dmetasoul.com/docs/lakeinsight/product-intro/">LakeInsight 产品文档</a>。</p>
+</blockquote>
+<h2 id="_2">计费说明</h2>
+<p>LakeInsight 支持以下两种部署模式，费用构成有所不同：</p>
+<ul>
+<li><strong>已有 ACK 集群</strong>：将服务直接部署到已有集群，仅需支付软件费用。</li>
+<li><strong>新建 ACK 集群</strong>：需先创建集群再部署服务，需支付 ACK 资源费用和软件费用。</li>
+</ul>
+<p>LakeInsight 在计算巢上的费用主要涉及：</p>
+<ul>
+<li>所选 vCPU 与内存规格</li>
+<li>磁盘容量</li>
+<li>公网带宽</li>
+<li>ACK 集群费用（仅新建集群模式）</li>
+<li>软件费用</li>
+</ul>
+<p>计费方式为按量付费（小时），主要为云资源费用，计算方式如下：</p>
+<h3 id="cru">CRU 定义</h3>
+<p><strong>CRU (Compute Resource Unit)</strong> = max(CPU 核数, 内存 GiB / 4)</p>
+<p>1 CRU 以 1 vCPU + 4 GiB 内存为基准；实际取值按公式取较高者——CPU 密集型场景取 CPU 核数，内存密集型场景取内存 GiB / 4。</p>
+<h3 id="_3">资源计量</h3>
+<ul>
+<li><strong>CPU</strong>：<code>rate(container_cpu_usage_seconds_total[5m])</code> → 1h 平均 → cores</li>
+<li><strong>内存</strong>：<code>container_memory_working_set_bytes</code> → 1h 平均 → GiB</li>
+<li><strong>CRU</strong>：max(CPU_cores, Memory_GiB / 4)</li>
+<li><strong>运行分钟</strong>：基于 Pod 生命周期（Running）统计该小时内 <code>runtime_minutes</code></li>
+<li><strong>有效 CRU</strong>：<code>effective_cru = cru × runtime_minutes / 60</code></li>
+</ul>
+<h3 id="_4">计费公式</h3>
+<pre><code>小时费用 = effective_cru × 基础单价 × 作业类型系数
+</code></pre>
+<p><strong>示例</strong>：
+- Pod 平均用量：2 CPU + 6 GiB 内存
+- CRU = max(2, 6/4) = max(2, 1.5) = 2
+- 基础单价：0.5 元/CRU/小时
+- 作业类型：streaming（系数 1.2）
+- 若该小时运行 30 分钟：effective_cru = 2 × 30/60 = 1
+- 小时费用 = 1 × 0.5 × 1.2 = 0.6 元</p>
+<p>预估费用在创建实例时可实时看到。</p>
+<h2 id="_5">部署架构</h2>
+<p>LakeInsight 采用云原生容器化架构，部署在阿里云 ACK（容器服务 Kubernetes 版）集群上，核心组件如下：</p>
+<table>
+<thead>
+<tr>
+<th>组件</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LakeInsight 服务</td>
+<td>核心湖仓数据智能平台，包含 Web 控制台、任务调度与查询引擎</td>
+</tr>
+<tr>
+<td>PostgreSQL</td>
+<td>元数据存储，支持使用内置高可用集群（CloudNative-PG，2-3 副本）或外接已有 PostgreSQL</td>
+</tr>
+<tr>
+<td>对象存储</td>
+<td>湖仓数据持久化存储，支持使用内置存储卷或外接 S3 兼容对象存储</td>
+</tr>
+<tr>
+<td>MSE Ingress</td>
+<td>通过阿里云微服务引擎（MSE）提供公网/内网访问入口，支持自定义域名与 HTTPS</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="部署架构图" src="images/architecture.png" /></p>
+<h2 id="ram">RAM 账号所需权限</h2>
+<p>若您使用 RAM 用户创建服务实例，需提前为该账号添加以下资源访问权限。添加权限的详细操作，请参见 <a href="https://help.aliyun.com/document_detail/121945.html">为 RAM 用户授权</a>。</p>
+<table>
+<thead>
+<tr>
+<th>权限策略名称</th>
+<th>用途</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AliyunECSFullAccess</td>
+<td>创建和管理 ACK 所需的 ECS 云服务器实例</td>
+<td>管理云服务器服务（ECS）的权限</td>
+</tr>
+<tr>
+<td>AliyunVPCFullAccess</td>
+<td>创建和管理 VPC 专有网络及交换机</td>
+<td>管理专有网络（VPC）的权限</td>
+</tr>
+<tr>
+<td>AliyunROSFullAccess</td>
+<td>通过资源编排服务自动创建云资源栈</td>
+<td>管理资源编排服务（ROS）的权限</td>
+</tr>
+<tr>
+<td>AliyunComputeNestUserFullAccess</td>
+<td>使用计算巢创建和管理服务实例</td>
+<td>管理计算巢服务（ComputeNest）的用户侧权限</td>
+</tr>
+<tr>
+<td>AliyunCloudMonitorFullAccess</td>
+<td>监控集群节点和服务运行状态</td>
+<td>管理云监控（CloudMonitor）的权限</td>
+</tr>
+<tr>
+<td>AliyunCSFullAccess</td>
+<td>创建和管理 ACK（容器服务 Kubernetes 版）集群</td>
+<td>管理容器服务（CS）的权限</td>
+</tr>
+<tr>
+<td>AliyunTagAdministratorAccess</td>
+<td>为实例资源打标签，便于分账和管理</td>
+<td>管理标签服务（TAG）和所有阿里云产品标签的权限</td>
+</tr>
+<tr>
+<td>AliyunMSEFullAccess</td>
+<td>通过 MSE Ingress 提供公网/内网访问入口</td>
+<td>管理微服务引擎（MSE）的权限</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_6">部署流程</h2>
+<h3 id="_7">部署步骤</h3>
+<ol>
+<li>单击部署链接，进入服务实例部署界面。您可以在阿里云计算巢自行搜索 LakeInsight，进行订阅。</li>
+<li>根据界面提示，填写参数完成部署。</li>
+</ol>
+<h3 id="_8">部署参数说明</h3>
+<p>创建服务实例时，需根据实际情况配置以下参数。参数分为三种场景：已有 ACK 集群、新建 ACK 集群，以及应用级别配置（含外部存储选择）。</p>
+<h4 id="ack">已有 ACK 集群</h4>
+<p>选择"否"（不新建 ACK 集群）时，需提供已有集群信息：</p>
+<table>
+<thead>
+<tr>
+<th>参数组</th>
+<th>参数项</th>
+<th>示例</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>基础信息</td>
+<td>服务实例名称</td>
+<td>test</td>
+<td>实例的名称</td>
+</tr>
+<tr>
+<td>基础信息</td>
+<td>地域</td>
+<td>华东1（杭州）</td>
+<td>选中服务实例的地域，建议就近选中，以获取更好的网络延时。</td>
+</tr>
+<tr>
+<td>集群配置</td>
+<td>是否新建 ACK 集群</td>
+<td>否</td>
+<td>选择否代表已有 ACK 集群，不用新建</td>
+</tr>
+<tr>
+<td>集群配置</td>
+<td>K8s 集群 ID</td>
+<td>ccde6dxxxxxxxxxxxx1230d</td>
+<td>根据地域选择用户已有的集群 ID</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="已有 ACK 集群示例" src="images/noack.png" /></p>
+<h4 id="ack_1">新建 ACK 集群</h4>
+<p>选择"是"（新建 ACK 集群）时，需配置以下基础资源和 Kubernetes 参数：</p>
+<table>
+<thead>
+<tr>
+<th>参数组</th>
+<th>参数项</th>
+<th>示例</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>基础信息</td>
+<td>服务实例名称</td>
+<td>test</td>
+<td>实例的名称</td>
+</tr>
+<tr>
+<td>基础信息</td>
+<td>地域</td>
+<td>华东1（杭州）</td>
+<td>选中服务实例的地域，建议就近选中，以获取更好的网络延时。</td>
+</tr>
+<tr>
+<td>集群配置</td>
+<td>是否新建 ACK 集群</td>
+<td>是</td>
+<td>选择是代表新建 ACK 集群</td>
+</tr>
+<tr>
+<td>基础配置</td>
+<td>可用区</td>
+<td>可用区I</td>
+<td>地域下的不同可用区域</td>
+</tr>
+<tr>
+<td>基础配置</td>
+<td>专有网络 IPv4 网段</td>
+<td>192.168.0.0/16</td>
+<td>VPC 的 IP 地址段范围</td>
+</tr>
+<tr>
+<td>基础配置</td>
+<td>交换机子网网段</td>
+<td>192.168.1.0/24</td>
+<td>必须属于 VPC 的子网段</td>
+</tr>
+<tr>
+<td>基础配置</td>
+<td>实例密码</td>
+<td><strong><em>*</em></strong>*</td>
+<td>设置实例密码。长度8~30个字符，必须包含三项（大写字母、小写字母、数字、()~!@#$%^&amp;*-+={}[]:;'&lt;&gt;,.?/ 中的特殊符号）</td>
+</tr>
+<tr>
+<td>Kubernetes 配置</td>
+<td>Worker 节点规格</td>
+<td>ecs.g6.large</td>
+<td>选择对应 CPU 核数和内存大小的 ECS 实例，用作 Kubernetes 节点</td>
+</tr>
+<tr>
+<td>Kubernetes 配置</td>
+<td>Worker 系统盘磁盘类型</td>
+<td>ESSD云盘</td>
+<td>选择集群 Worker 节点使用的系统盘磁盘类型</td>
+</tr>
+<tr>
+<td>Kubernetes 配置</td>
+<td>Worker 节点系统盘大小(GB)</td>
+<td>120</td>
+<td>设置 Worker 节点系统盘大小，单位为 GB</td>
+</tr>
+<tr>
+<td>Kubernetes 配置</td>
+<td>Service CIDR</td>
+<td>172.16.0.0/16</td>
+<td>ACK Service 网络段，可选范围：10.0.0.0/16-24，172.16-31.0.0/16-24，192.168.0.0/16-24，不能与 VPC 及 VPC 内已有 Kubernetes 集群使用的网段重复。</td>
+</tr>
+<tr>
+<td>Kubernetes 配置</td>
+<td>Pod 网络 CIDR</td>
+<td>10.0.0.0/8</td>
+<td>ACK Pod 网络段，网络插件为 Flannel 时必填。请填写有效的私有网段，即以下网段及其子网：10.0.0.0/8，172.16-31.0.0/12-16，192.168.0.0/16，不能与 VPC 及 VPC 内已有 Kubernetes 集群使用的网段重复。</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="新建 ACK 集群示例1" src="images/createack.png" />
+<img alt="新建 ACK 集群示例2" src="images/createack-part2.png" /></p>
+<h4 id="_9">应用配置</h4>
+<p>应用级别参数，包含 LakeInsight 管理员账号、网络访问、外部存储及调度组件等配置：</p>
+<table>
+<thead>
+<tr>
+<th>参数项</th>
+<th>示例</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LakeInsight 管理员密码</td>
+<td>123456</td>
+<td>自定义首次打开LakeInsight界面的登录密码</td>
+</tr>
+<tr>
+<td>LakeInsight 管理员用户</td>
+<td>lakeadmin</td>
+<td>自定义管理员用户名，默认为 lakeadmin</td>
+</tr>
+<tr>
+<td>访问域名</td>
+<td>否</td>
+<td>自定义访问域名。留空则自动获取阿里云 MSE Ingress 域名，可用于测试，每天有 1000 次访问限制，请勿直接用于生产环境。</td>
+</tr>
+<tr>
+<td>启用 HTTPS</td>
+<td>是</td>
+<td>是否启用 HTTPS 访问，启用后需配置 TLS 证书和私钥</td>
+</tr>
+<tr>
+<td>TLS 证书（PEM 格式）</td>
+<td>否</td>
+<td>TLS 证书内容（PEM 格式），启用 HTTPS 时必填</td>
+</tr>
+<tr>
+<td>TLS 私钥（PEM 格式）</td>
+<td>否</td>
+<td>TLS 私钥内容（PEM 格式），启用 HTTPS 时必填</td>
+</tr>
+<tr>
+<td>使用外部对象存储</td>
+<td>是</td>
+<td>选择是代表使用已有的外部对象存储服务，需配置下方对象存储相关参数。选择否将使用内置存储</td>
+</tr>
+<tr>
+<td>对象存储 Endpoint</td>
+<td></td>
+<td>外部对象存储服务的访问端点</td>
+</tr>
+<tr>
+<td>对象存储 AccessKey</td>
+<td></td>
+<td>外部对象存储服务的 AccessKey</td>
+</tr>
+<tr>
+<td>对象存储 SecretKey</td>
+<td></td>
+<td>外部对象存储服务的 SecretKey</td>
+</tr>
+<tr>
+<td>对象存储 Bucket</td>
+<td></td>
+<td>外部对象存储的 Bucket 名称</td>
+</tr>
+<tr>
+<td>对象存储 Region</td>
+<td></td>
+<td>外部对象存储服务的 Region</td>
+</tr>
+<tr>
+<td>使用外部 PostgreSQL</td>
+<td>是</td>
+<td>选择是代表使用已有的外部 PostgreSQL 服务，需填写下方 PostgreSQL 连接参数。选择否，系统将自动部署一个高可用 PostgreSQL 集群（14.15 版本，规格详见下方说明）</td>
+</tr>
+<tr>
+<td>PostgreSQL 服务地址</td>
+<td></td>
+<td>外部 PostgreSQL 服务的连接地址</td>
+</tr>
+<tr>
+<td>PostgreSQL 端口</td>
+<td></td>
+<td>外部 PostgreSQL 服务的端口号</td>
+</tr>
+<tr>
+<td>PostgreSQL 用户名</td>
+<td></td>
+<td>外部 PostgreSQL 服务的用户名</td>
+</tr>
+<tr>
+<td>PostgreSQL 密码</td>
+<td></td>
+<td>外部 PostgreSQL 服务的密码</td>
+</tr>
+<tr>
+<td>是否启用数据查询服务</td>
+<td></td>
+<td>是否启用数据查询相关功能（需先启用 HTTPS）</td>
+</tr>
+<tr>
+<td>PostgreSQL 规模</td>
+<td>medium</td>
+<td>内置 PostgreSQL 集群的资源规格：medium（2 副本 / 2 CPU / 4 Gi 内存 / 50 Gi 存储）、large（3 副本 / 2 CPU / 8 Gi 内存 / 100 Gi 存储），详见下方规格表。</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="应用配置填写示例" src="images/createapp.png" /></p>
+<h4 id="postgresql">不使用外部 PostgreSQL</h4>
+<p>当"使用外部 PostgreSQL"选择"否"时，系统将自动部署内置 PostgreSQL 集群。资源规格由 <strong>PostgreSQL 规模</strong> 参数决定：</p>
+<table>
+<thead>
+<tr>
+<th>配置项</th>
+<th>medium</th>
+<th>large</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>镜像版本</td>
+<td>PostgreSQL 14.15（CloudNative-PG）</td>
+<td>PostgreSQL 14.15（CloudNative-PG）</td>
+</tr>
+<tr>
+<td>副本数</td>
+<td>2</td>
+<td>3</td>
+</tr>
+<tr>
+<td>CPU requests</td>
+<td>2 核</td>
+<td>2 核</td>
+</tr>
+<tr>
+<td>CPU limits</td>
+<td>8 核</td>
+<td>8 核</td>
+</tr>
+<tr>
+<td>内存 requests</td>
+<td>4 Gi</td>
+<td>8 Gi</td>
+</tr>
+<tr>
+<td>内存 limits</td>
+<td>32 Gi</td>
+<td>32 Gi</td>
+</tr>
+<tr>
+<td>数据存储（storage）</td>
+<td>50 Gi</td>
+<td>100 Gi</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>默认 StorageClass: <code>csi-disk-topology</code>。</p>
+</blockquote>
+<h4 id="postgresql_1">使用外部 PostgreSQL</h4>
+<p>当"使用外部 PostgreSQL"选择"是"时，需在上方应用配置表中填写外部 PostgreSQL 的连接信息。填写示例如下：</p>
+<p><img alt="使用外部存储时参数填写示例" src="images/yesstorage.png" /></p>
+<h3 id="_10">验证结果</h3>
+<p>部署完成后，通过以下步骤验证服务是否正常运行：</p>
+<ol>
+<li>
+<p><strong>查看服务实例</strong>：在左侧导航栏进入"服务实例管理"，确认服务实例状态为"已部署"。部署过程大约需要 10 分钟。 
+<img alt="部署成功示例图" src="images/deploysuccess.png" /></p>
+</li>
+<li>
+<p><strong>获取访问信息</strong>：点击"详情"进入服务实例详情页，可查看部署状态与基础信息。
+<img alt="服务实例详细信息" src="images/deployinfo.png" /></p>
+<p>访问域名需前往 <a href="https://mse.console.aliyun.com/#/microgw?region=cn-hangzhou">MSE 云原生网关控制台</a> 查看，在网关列表中可获取访问域名、路由配置等信息。
+<img alt="MSE 网关信息" src="images/msegateway.png" /></p>
+<p>进入 Workbench 集群管理界面，通过 <code>kubectl -n lakeinsight get pod</code> 查看各组件 Pod 状态，确认所有 Pod 状态均为 <code>Running</code>。
+<img alt="Pod状态" src="images/get-pod-status.png" /></p>
+</li>
+<li>
+<p><strong>访问 LakeInsight</strong>：</p>
+<ul>
+<li><strong>正式环境</strong>：若指定了自定义域名，需将 MSE Ingress 域名解析到对应的 IP 地址后方可通过域名访问。</li>
+<li><strong>测试环境</strong>：可直接使用 MSE 提供的测试域名访问，在浏览器中忽略安全证书提示即可。</li>
+</ul>
+</li>
+<li>
+<p><strong>注册用户</strong>：首次访问 <code>&lt;域名&gt;/casdoor</code> 进入 Casdoor 用户中心（身份认证服务）。使用管理员账号 <code>admin</code> 和部署时设置的 <strong>LakeInsight 管理员密码</strong> 登录 Casdoor，进入用户管理页面创建 <code>lakeadmin</code> 用户。
+<img alt="登录页面" src="images/loginpage.png" /></p>
+</li>
+<li>
+<p><strong>登录 LakeInsight</strong>：创建完成后，使用 <code>lakeadmin</code> 用户登录 LakeInsight 主界面（访问 <code>&lt;域名&gt;</code>），即可进入主页开始提交和运行任务。
+<img alt="LakeInsight登录页面" src="images/lakeinsight-loginpage.png" />
+<img alt="主页" src="images/mainpage.png" /></p>
+</li>
+</ol>
+<h2 id="_11">问题排查</h2>
+<p>请将问题反馈至<a href="mailto:public-contact@dmetasoul.com">public-contact@dmetasoul.com</a>，我们将为您排查解答。</p>
+<h2 id="_12">联系我们</h2>
+<p>欢迎访问<a href="https://www.dmetasoul.com">数元灵</a>官网了解更多信息。</p>
+<p>联系邮箱：<a href="mailto:public-contact@dmetasoul.com">public-contact@dmetasoul.com</a></p>
+<p>社区版开源地址：<a href="https://github.com/lakesoul-io/LakeSoul">https://github.com/lakesoul-io/LakeSoul</a></p>
+<p>扫码关注微信公众号，技术博客、活动通知不容错过：</p>
+<p><img src="./images/wechat.jpg" width = "50%" /></p>
+        
+      </div>
+
+      <div class="copyrights">© 2009-2022 Aliyun.com 版权所有</div>
+    </div>
+  </div>
+  
+  <!--
+  MkDocs version      : 1.6.1
+  Docs Build Date UTC : 2026-07-06 02:36:14.668498+00:00
+  -->
+</body>
+</html>
