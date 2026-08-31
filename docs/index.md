@@ -168,8 +168,11 @@ LakeInsight 采用云原生容器化架构，部署在阿里云 ACK（容器服�
 | PostgreSQL 密码 |  | 外部 PostgreSQL 服务的密码 |
 | 是否启用数据查询服务 |  | 是否启用数据查询相关功能（需先启用 HTTPS） |
 | PostgreSQL 规模 | medium | 内置 PostgreSQL 集群的资源规格：medium（2 副本 / 2 CPU / 4 Gi 内存 / 50 Gi 存储）、large（3 副本 / 2 CPU / 8 Gi 内存 / 100 Gi 存储），详见下方规格表。|
+| 是否启用 Ray 服务 | 否 | 是否部署 Ray 集群，用于分布式 Python / AI 计算。默认关闭。 |
+| 是否启用数据治理服务 | 否 | 是否部署数据治理组件（元数据、血缘与数据资产目录）。默认关闭。 |
+| 是否启用模型实验服务 | 否 | 是否部署模型实验跟踪服务，用于管理模型训练实验与产物。默认关闭。 |
 
-![应用配置填写示例](./images/createapp.png)
+![应用配置填写示例](./images/createapp.jpg)
 
 #### 不使用外部 PostgreSQL
 
